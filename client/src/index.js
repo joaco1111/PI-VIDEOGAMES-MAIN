@@ -4,6 +4,14 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+const apiUrl = 'http://localhost:3001';
+
+fetch(`${apiUrl}/videogames`)
+  .then((response) => response.json())
+  .then((data) => {// Procesa los datos recibidos del backend.
+  })
+  .catch((error) => {// Maneja los errores de la solicitud.
+  });
 ReactDOM.render(
   <React.StrictMode>
     <App />
