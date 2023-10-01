@@ -3,19 +3,18 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Provider } from 'react-redux'
+import store from './redux/store'
+import { BrowserRouter } from 'react-router-dom'
 
-const apiUrl = 'http://localhost:3001';
-
-fetch(`${apiUrl}/videogames`)
-  .then((response) => response.json())
-  .then((data) => {// Procesa los datos recibidos del backend.
-  })
-  .catch((error) => {// Maneja los errores de la solicitud.
-  });
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <Provider store={store}> {/*este componente hace que el store de Redux este disponible para TODA la app*/}
+    <BrowserRouter>
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    </BrowserRouter>
+  </Provider>,
   document.getElementById('root')
 );
 
