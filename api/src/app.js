@@ -1,46 +1,54 @@
 const express = require('express');
-const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const routes = require('./routes/index.js');
+const server = express();
+require('./db.js');
+
+const dotenv = require('dotenv');
+dotenv.config();
+
+
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-const corsOptions = {
-  origin: 'http://localhost:3001',
-};
-
-app.use(cors(corsOptions));
-
-// Middleware
-app.use(cors());
+// Middleware para parsear JSON
 app.use(express.json());
 
-// Conexión a la base de datos
-const { sequelize } = require('./models');
-sequelize.sync({ force: false }) // Utiliza { force: true } para recrear las tablas en cada reinicio (en desarrollo)
-  .then(() => {
-    console.log('Conexión a la base de datos establecida correctamente.');
-  })
-  .catch((err) => {
-    console.error('Error en la conexión a la base de datos:', err);
-  });
+// Rutas de la API
+app.use('/api', routes);
 
-// Rutas
-const videogamesRoutes = require('./routes/videogames');
-const genresRoutes = require('./routes/genres');
-
-app.use('/videogames', videogamesRoutes);
-app.use('/genres', genresRoutes);
-
-// Ruta de inicio
-app.get('/', (req, res) => {
-  res.send('Bienvenido a la API de Videojuegos');
-});
-
-// Manejo de errores
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Algo salió mal!');
-});
+// Puerto en el que escucha la API
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Servidor en ejecución en el puerto ${PORT}`);
+  console.log(`Servidor API en ejecución en el puerto ${PORT}`);
 });
+
+
+
+server.name = 'API';
+
+server.use(express.urlencoded({ extended: true, limit: '50mb' }));
+server.use(express.json({ limit: '50mb' }));
+server.use(cookieParser());
+server.use(morgan('dev'));
+server.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // update to match the domain you will make the request from
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  next();
+});
+
+server.use('/', routes);
+
+// Error catching endware.
+server.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+  const status = err.status || 500;
+  const message = err.message || err;
+  console.error(err);
+  res.status(status).send(message);
+});
+
+module.exports = server;
